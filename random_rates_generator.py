@@ -20,29 +20,37 @@ OUTPUTCONSTANTRATESFILEPATH = os.path.join(OUTPUTFOLDER, "random_const_rates.csv
 # [USER INSTRUCTIONS #1]
 def PrintInstructions():
     print(
-            f"Welcome to the Random Currency generator."
-            f"\nThis app is used to generate random exchange rates for unit and load testing purposes in a target KIP Currency Application"
-            f"\nYou would need to: "
+            f" * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
+            f" \n\n\tWELCOME TO THE RANDOM CURRENCY RATE GENERATOR"
+            f"\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
+            f"\n\nThis app is used to generate random exchange rates for unit and load testing purposes in a target KIP Currency Application"
+            f"\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
+            f"\nBefore you run the app, you would need to: "
             f"\n\t1. Review the file containing a list of the rate groups, called {RATEGROUPFILE}. Add and update entries as required."
-            f"\n\t2. Review the file containing a list of 3-letter ISO currency codes (e.g. GBP, USD, etc), called {CURRENCYFILE}. Add and update entries as required."
-            f"\n\n Each entry in each of the files i)must have no trailing spaces or spaces (for rate groups), and ii)should be on a separate line."
-            f"\n\n The data generated is purely mock random data and has no bearing on any existing entity, engagement or the company. "
+            f"\n\n\t2. Review the file containing a list of 3-letter ISO currency codes (e.g. GBP, USD, etc), called {CURRENCYFILE}. Add and update entries as required."
+            f"\n\n\n Entries in each of the files must i) be on a separate line, ii) have no trailing or leading spaces or spaces (the rate group entries can have spaces within them but not at the beginning or end)"
+            f"\n\n * * The data generated is purely mock random data and has no bearing on any existing entity, engagement or the company. * * "
             f"\n\n The entries in each file must be valid for use in the target Currency App, in that they must exist in that Application's database. " 
             f"\n\nFor the rate groups, the first entry must be the (default) group for the KPMG constant rates as configured in the target Currency App"
-            f"\n\nThe created files should be saved in the {OUTPUTFOLDER} directory."
-            f"\n\t3. Indicate how many exchange rates you wish to generate. This can be any figure. "
-            f"Bear in mind the larger the number, the slower the application could be. Performance is not guaranteed."
+            f"\n\nThe created files will be saved to the {OUTPUTFOLDER} directory."
+            f"\n\n\n\t3. Indicate how many exchange rates you wish to generate. This can be any figure. "
+            f"Bear in mind larger numbers may impact performance, which is not guaranteed."
             f"\n\n\nCreate the files as instructed and then answer the next question."
+            f"\n\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
         )
-    
-    return input(f"\n\tHave you created a rate group and currency file as instructed? \n\tEnter Y to continue: ").upper() == "Y"
+    if input(f"\n\tHave you created a rate group and currency file as instructed?"
+             f"\n\tEnter Y to continue: ").upper() == "Y":
+        return True
+    else:
+        print("\n\nThe program will exit now. When you're ready you can run the generator again.\n\n")
+        return False 
     
 
 def PrintEndText():
     print(
         f"Your rates have been generated. you can find them in the {OUTPUTFOLDER} directory.\n\n"
         f"Import the generated rates from the csv files into the import rates template in the Currency App."
-        f"\n\n\nThe program has ended."
+        f"\n\n\nThe program has ended.\n\n"
         )
 
 # Rate groups [USER CHECK/PROMPT #1]
@@ -64,7 +72,7 @@ def LoadRateGroups():
         rate_groups = tuple(rate_groups)
 
         #print(rate_groups)
-    if rate_groups.count() == 0:
+    if len(rate_groups) == 0:
         print(f"The {RATEGROUPFILE} file was not created OR the file had no groups in it. Aborting random rates generation.")
         return False
 
@@ -87,7 +95,7 @@ def LoadCurrencies():
         f.close()
 
         #print(currencies)
-    if currencies.count() == 0 :
+    if len(currencies) == 0 :
         print(f"The {CURRENCYFILE} file was not created OR the file had no currency codes in it. Aborting random rates generation.")
         return False
 
@@ -97,18 +105,19 @@ def LoadCurrencies():
 # how many exchange rates do you want to create? enter a number
 #----------------------------------------------------------------
 def GetTotalCountToCreate():
-    global rateCount 
-    
-    try:
-        rateCount = int(input("Enter the number of rates to generate (this MUST be > 5): "))
-    except ValueError:
-        rateCount = -1
-    
-    if(rateCount > 5):
-        return True 
+    _rate_count = -1
+
+    try: 
+        _rate_count = int(input("\n\nEnter the number of rates to generate (this MUST be > 5): "))
+    except:
+        print(f"Incorrect entry specified! Aborting random rates generation.\n\n")
+        return _rate_count
+
+    if(_rate_count > 5):
+        return _rate_count 
     else:
-        print(f"No number was specified. Aborting random rates generation.")
-        return False
+        print(f"No number was specified. Aborting random rates generation.\n\n")
+        return _rate_count
     
 
 
@@ -172,9 +181,6 @@ outputRates = {
 rate_types = ("Constant", "Day", "BalanceSheet", "ProfitAndLoss")
 
 
-
-
-    
 def GetRateGroup(avoidDefault=None):
     # ensure all rates data and settings specified here matches what is in the database
     rate_group = random.choice(rate_groups)
@@ -184,6 +190,7 @@ def GetRateGroup(avoidDefault=None):
     if avoidDefault:
         while rate_group == rate_groups[0]:
             rate_group = random.choice(rate_groups) 
+
     return rate_group
 
 
@@ -277,8 +284,8 @@ def RatePairExists(sourceKey, rateToFind):
 # MAIN PROGRAM BODY: 
 # 1 GENERATE Random Currency Rates 
 #----------------------------------------------------------------
-def GenerateRandomRates():
-    while rateCount != 0:
+def GenerateRandomRates(_rate_count):
+    while _rate_count != 0:
         currFrom, currTo, rate = GetCurrencyPair()
 
         actionIndex = random.randint(1,4)
@@ -309,7 +316,9 @@ def GenerateRandomRates():
 
         if actionIndex == 4: SetRandomDateConfig()
 
-        if actionIndex != 4: rateCount-=1
+        if actionIndex != 4: _rate_count-=1
+
+
 
 
 
@@ -337,15 +346,17 @@ def OutputRatesFiles():
 #----------------------------------------------------------------
 #----------------------------------------------------------------
 
-if PrintInstructions() and LoadCurrencies() and LoadRateGroups() and GetTotalCountToCreate():
+if PrintInstructions() and LoadCurrencies() and LoadRateGroups():
+    rateCount = GetTotalCountToCreate()
 
-    SetRandomDateConfig()
+    if(rateCount>0):
+        SetRandomDateConfig()
 
-    GenerateRandomRates() 
+        GenerateRandomRates(rateCount) 
 
-    OutputRatesFiles()
+        OutputRatesFiles()
 
-    PrintEndText()
+        PrintEndText()
 
 # PROGRAM END  
 #----------------------------------------------------------------
